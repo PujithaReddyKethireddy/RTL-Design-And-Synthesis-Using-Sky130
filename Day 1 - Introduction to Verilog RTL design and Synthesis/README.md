@@ -305,20 +305,13 @@ The waveform output confirms the correct working of the 2:1 multiplexer.
 
 ---
 
-```
-```
+
 # 3. Introduction to Logic Synthesis
 
 RTL code only describes the behavior of a digital circuit.
 However, real hardware implementation requires actual logic gates and standard cells.
 
 Synthesis is the process of converting RTL Verilog code into gate-level hardware representation.
-
-Real hardware implementation requires:
-
-* Logic gates
-* Standard cells
-* Physical hardware realization
 
 During synthesis, the RTL design and standard cell library are provided to Yosys, which converts the RTL description into a gate-level netlist.
 

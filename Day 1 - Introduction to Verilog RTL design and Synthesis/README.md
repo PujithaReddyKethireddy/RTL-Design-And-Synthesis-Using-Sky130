@@ -511,7 +511,7 @@ yosys
 ### Read Liberty File
 
 ```bash
-read_liberty -lib ../my_lib/lib/sky130_fd_sc_hd__tt_025C_1v80.lib
+read_liberty -lib ../lib/sky130_fd_sc_hd__tt_025C_1v80.lib
 ```
 
 #### Purpose
@@ -559,7 +559,7 @@ synth -top good_mux
 ### Technology Mapping
 
 ```bash
-abc -liberty ../my_lib/lib/sky130_fd_sc_hd__tt_025C_1v80.lib
+abc -liberty ../lib/sky130_fd_sc_hd__tt_025C_1v80.lib
 ```
 
 #### Purpose

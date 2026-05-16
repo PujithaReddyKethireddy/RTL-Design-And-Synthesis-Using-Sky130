@@ -94,29 +94,66 @@ This naming convention specifies the operating conditions under which the librar
 
 ---
 
+````markdown id="r8vk1z"
 # 4. Exploring the `.lib` File
 
 ## Library Preview
 
 ![Library Preview](./library_preview.png)
 
-The Liberty timing library stores the characterization data for all standard cells.
+The Liberty timing library stores the characterization data for all standard cells available in the SKY130 standard-cell library.
 
 Example:
 
 ```liberty
 cell ("sky130_fd_sc_hd__and2_4")
-```
+````
 
-This defines:
+This cell entry contains:
 
 * timing behavior
 * leakage power
-* area
-* capacitance
+* silicon area
+* capacitance information
 * transition delay
+* logical functionality
 
 for the AND gate standard cell.
+
+The synthesis tool reads this information to:
+
+* estimate delays
+* optimize timing
+* calculate power
+* choose suitable cells
+* map RTL into real hardware gates
+
+---
+
+## Logic Function Definition
+
+Example logic function inside the library:
+
+```liberty
+function : "(A&B)";
+```
+
+This represents:
+
+```text
+X = A & B
+```
+
+The output becomes HIGH only when:
+
+* `A = 1`
+* `B = 1`
+
+The synthesis tool uses this function to understand:
+
+* logical behavior
+* gate functionality
+* Boolean equivalence during optimization
 
 ---
 
@@ -128,21 +165,68 @@ for the AND gate standard cell.
 leakage_power ()
 ```
 
-Represents static power consumed even when the cell is idle.
+Represents static power consumed even when the gate is idle.
+
+Leakage power occurs because transistors are not perfect switches and always allow a very small leakage current to flow.
+
+Important in:
+
+* low-power ASICs
+* battery-operated devices
+* mobile processors
+* standby mode optimization
 
 ---
 
-# Area
+## Area
 
 ```liberty
 area : 8.7584000000;
 ```
 
-Defines silicon area occupied by the cell.
+Defines the physical silicon area occupied by the standard cell.
+
+Area directly affects:
+
+* chip size
+* routing congestion
+* manufacturing cost
+
+Smaller cells:
+
+* reduce silicon usage
+* reduce chip cost
+
+Larger cells:
+
+* improve timing
+* provide stronger drive capability
 
 ---
 
-# Timing Information
+## Capacitance
+
+```liberty
+capacitance : 0.0024120000;
+```
+
+Capacitance represents the electrical load seen by the previous stage.
+
+Higher capacitance:
+
+* increases propagation delay
+* slows transitions
+* increases dynamic power consumption
+
+Capacitance data is used during:
+
+* timing analysis
+* slew estimation
+* optimization
+
+---
+
+## Timing Information
 
 ```liberty
 cell_rise
@@ -156,6 +240,42 @@ Used for:
 * setup analysis
 * hold analysis
 * delay calculation
+* timing closure
+
+---
+
+### `cell_rise`
+
+Defines propagation delay when output changes:
+
+* LOW → HIGH
+
+---
+
+### `cell_fall`
+
+Defines propagation delay when output changes:
+
+* HIGH → LOW
+
+---
+
+### `rise_transition`
+
+Defines output rise slew characteristics.
+
+---
+
+### `fall_transition`
+
+Defines output fall slew characteristics.
+
+These timing parameters are critical for:
+
+* meeting setup timing
+* meeting hold timing
+* calculating path delays
+* timing optimization
 
 ---
 
@@ -175,32 +295,100 @@ Where:
 | `index_2` | Output capacitance |
 | `values`  | Delay values       |
 
+The synthesis and STA tools use these lookup tables to estimate delays under different loading conditions.
+
+Example:
+
+* large output capacitance
+* slow input transition
+
+→ larger propagation delay
+
 ---
 
 # Standard Cell Drive Strengths
 
-The same logic gate exists in multiple strengths:
+The same logic gate exists in multiple drive strengths inside the SKY130 standard-cell library.
 
-| Cell     | Drive Strength |
-| -------- | -------------- |
-| `and2_0` | Weak drive     |
-| `and2_2` | Medium drive   |
-| `and2_4` | Strong drive   |
+Example AND gate cells:
 
-All implement the same logic:
+| Cell     | Drive Strength    |
+| -------- | ----------------- |
+| `and2_0` | Weak drive        |
+| `and2_1` | Medium drive      |
+| `and2_2` | Strong drive      |
+| `and2_4` | Very strong drive |
 
-[
-X = A \cdot B
-]
+All implement the same Boolean logic:
 
-X=A\cdot B
+```text
+X = A & B
+```
 
-But differ in:
+However, they differ in:
 
-* speed
-* power
-* area
-* load-driving capability
+* transistor sizing
+* timing performance
+* power consumption
+* silicon area
+* fanout capability
+
+---
+
+## Drive Strength Comparison from SKY130 Library
+
+| Parameter               | `and2_0`            | `and2_1`        | `and2_2`                 | `and2_4`                   |
+| ----------------------- | ------------------- | --------------- | ------------------------ | -------------------------- |
+| Logic Function          | `X = A & B`         | `X = A & B`     | `X = A & B`              | `X = A & B`                |
+| Relative Drive Strength | Weak                | Medium          | Strong                   | Very Strong                |
+| Approximate Area        | `6.256000`          | `8.758400`      | `15.014400`              | `23.772800`                |
+| Relative Speed          | Slowest             | Moderate        | Faster                   | Fastest                    |
+| Relative Delay          | Highest             | Medium          | Lower                    | Lowest                     |
+| Dynamic Power           | Lowest              | Medium          | Higher                   | Highest                    |
+| Leakage Power           | Lowest              | Medium          | Higher                   | Highest                    |
+| Transistor Size         | Smallest            | Small           | Large                    | Largest                    |
+| Load Driving Capability | Low                 | Medium          | High                     | Very High                  |
+| Fanout Capability       | Small loads         | Moderate loads  | Medium fanout            | Large fanout               |
+| Typical Usage           | Non-critical paths  | General logic   | Medium critical paths    | Critical timing paths      |
+| Area Consumption        | Smallest            | Small           | Large                    | Largest                    |
+| Timing Performance      | Poor                | Moderate        | Good                     | Best                       |
+| Optimization Goal       | Area & Power Saving | Balanced Design | Performance Optimization | Maximum Timing Performance |
+
+---
+
+## Understanding the Tradeoff
+
+As drive strength increases:
+
+* transistor width increases
+* output current increases
+* propagation delay decreases
+* power consumption increases
+* silicon area increases
+
+Smaller cells like `and2_0` are used for:
+
+* low-power regions
+* non-critical timing paths
+* small fanout loads
+
+Larger cells like `and2_4` are used for:
+
+* critical timing paths
+* large capacitive loads
+* high fanout nets
+
+During synthesis, the tool automatically selects different drive-strength cells depending on:
+
+* timing requirements
+* output load
+* fanout
+* optimization goals
+
+This process is called:
+
+* cell sizing
+* drive strength optimization
 
 ---
 
@@ -210,7 +398,7 @@ But differ in:
 
 ![Cell Model and Verilog](./example_of_cellmodel\&verilog.png)
 
-The Verilog behavioral model describes only the logical functionality.
+The Verilog behavioral model describes only the logical functionality of the standard cell.
 
 Example:
 
@@ -221,11 +409,21 @@ buf buf0 (X, and0_out_X);
 
 Function:
 
-[
-X = A \land B
-]
+```text
+X = A & B
+```
 
-X=A\land B
+The Verilog model is mainly used for:
+
+* RTL simulation
+* functional verification
+* gate-level simulation
+
+while the `.lib` file is used for:
+
+* timing analysis
+* power estimation
+* technology mapping
 
 ---
 
@@ -234,6 +432,7 @@ X=A\land B
 The SKY130 library contains:
 
 * `and2_0`
+* `and2_1`
 * `and2_2`
 * `and2_4`
 
@@ -251,6 +450,24 @@ The wrapper changes:
 * drive strength
 
 but functionality remains identical.
+
+---
+
+## Wrapper Module Comparison
+
+| Module   | Drive Strength | Typical Usage                         |
+| -------- | -------------- | ------------------------------------- |
+| `and2_0` | Weak           | Small loads and non-critical paths    |
+| `and2_1` | Medium         | General logic paths                   |
+| `and2_2` | Strong         | Moderate fanout and optimized timing  |
+| `and2_4` | Very Strong    | Critical timing paths and heavy loads |
+
+This allows the synthesis tool to select different versions of the same logic gate depending on:
+
+* timing requirements
+* fanout
+* output capacitance
+* optimization goals
 
 ---
 
@@ -275,7 +492,12 @@ These represent:
 * ground
 * well bias connections
 
-Used in full ASIC integration.
+Used in:
+
+* full ASIC integration
+* power-aware simulation
+* physical implementation
+* gate-level verification
 
 ---
 
@@ -287,9 +509,20 @@ The models also contain:
 `ifdef FUNCTIONAL
 ```
 
+---
+
 ## Functional Model
 
 * simplified logic-only simulation
+* faster simulation runtime
+* ignores detailed electrical behavior
+
+Used during:
+
+* RTL debugging
+* early verification
+
+---
 
 ## Behavioral / Power-Aware Model
 
@@ -297,38 +530,67 @@ Includes:
 
 * power-good checking
 * realistic ASIC behavior
+* power dependency modeling
 
+Used during:
+
+* gate-level simulation
+* detailed verification
+* ASIC signoff analysis
+
+These models behave more realistically and help detect:
+
+* power connectivity issues
+* invalid power conditions
+* incorrect cell behavior under power failure
 ---
 
 # 6. Hierarchical vs Flat Synthesis
 
 Synthesis tools can synthesize RTL designs using:
+- hierarchical synthesis
+- flat synthesis
 
-* hierarchical synthesis
-* flat synthesis
+Both approaches generate functionally correct hardware, but the optimization strategy differs significantly.
+
+Hierarchical synthesis preserves module boundaries, while flat synthesis removes hierarchy to optimize the complete design globally.
 
 ---
 
 # Hierarchical Synthesis
 
 In hierarchical synthesis:
+- module hierarchy is preserved
+- each module is synthesized independently
+- module boundaries remain visible after synthesis
 
-* module hierarchy is preserved
-* modules are synthesized separately
+This approach is commonly used in:
+- large ASIC projects
+- modular RTL design
+- reusable IP-based designs
+
+because it simplifies:
+- debugging
+- incremental design updates
+- hierarchical verification
 
 ---
 
 ## Advantages
 
-* faster synthesis
+* faster synthesis runtime
 * easier debugging
 * modular design flow
+* simpler RTL tracing
+* reusable module structure
 
 ---
 
 ## Disadvantages
 
 * limited cross-module optimization
+* reduced timing optimization opportunities
+* redundant logic may remain across modules
 
 ---
 
@@ -338,14 +600,31 @@ In hierarchical synthesis:
 
 The module boundaries are preserved after synthesis.
 
+Each RTL module remains as a separate synthesized block, making the design easier to:
+- understand
+- debug
+- modify
+
+However, the synthesis tool cannot fully optimize logic across different modules because hierarchy is maintained.
+
 ---
 
 # Flat Synthesis
 
 In flat synthesis:
+- all hierarchy is collapsed
+- module boundaries are removed
+- the entire design becomes a single logic block
 
-* all hierarchy is collapsed
-* design becomes a single logic block
+This allows the synthesis tool to:
+- view the entire circuit globally
+- optimize logic across module boundaries
+- eliminate redundant hardware
+
+Flat synthesis is mainly used when:
+- maximum timing optimization is required
+- aggressive area optimization is needed
+- performance is more important than modularity
 
 ---
 
@@ -354,6 +633,8 @@ In flat synthesis:
 * better optimization
 * reduced redundant logic
 * improved timing opportunities
+* better area optimization
+* global logic simplification
 
 ---
 
@@ -362,6 +643,8 @@ In flat synthesis:
 * difficult debugging
 * larger netlists
 * slower synthesis runtime
+* higher memory usage
+* harder RTL tracing
 
 ---
 
@@ -369,7 +652,15 @@ In flat synthesis:
 
 ![Flat Netlist](./flat_netlist.png)
 
-All modules are merged into one netlist.
+All modules are merged into one synthesized netlist.
+
+The synthesis tool treats the complete design as a single logic block and performs:
+- global optimization
+- logic restructuring
+- gate minimization
+- timing improvement
+
+This can significantly improve timing performance but reduces readability of the synthesized design.
 
 ---
 
@@ -377,13 +668,18 @@ All modules are merged into one netlist.
 
 ![Hierarchical vs Flat](./heir_flat.png)
 
-| Feature      | Hierarchical | Flat    |
-| ------------ | ------------ | ------- |
-| Hierarchy    | Preserved    | Removed |
-| Runtime      | Faster       | Slower  |
-| Debugging    | Easier       | Harder  |
-| Optimization | Limited      | Better  |
-| Netlist      | Modular      | Complex |
+| Feature | Hierarchical | Flat |
+|---|---|---|
+| Hierarchy | Preserved | Removed |
+| Runtime | Faster | Slower |
+| Debugging | Easier | Harder |
+| Optimization | Limited | Better |
+| Netlist Structure | Modular | Complex |
+| Memory Usage | Lower | Higher |
+| Timing Optimization | Moderate | Strong |
+| RTL Traceability | Easier | Difficult |
+| Cross-Module Optimization | Limited | Extensive |
+| Typical Usage | Large modular designs | Timing-critical designs |
 
 ---
 
@@ -392,26 +688,46 @@ All modules are merged into one netlist.
 ![Multiple Modules](./multiple_modules.v.png)
 
 This example demonstrates:
+- module hierarchy
+- interconnection between modules
+- synthesis behavior
+- hierarchy preservation
+- flattening during synthesis
 
-* module hierarchy
-* interconnection
-* synthesis behavior
+In hierarchical synthesis:
+- each module is synthesized separately
 
-during hierarchical and flat synthesis.
+In flat synthesis:
+- all modules are merged into one optimized design
+
+This demonstrates how synthesis strategy affects:
+- optimization quality
+- netlist complexity
+- debugging capability
 
 ---
 
 # 7. Logic Optimization During Synthesis
 
-One important observation from Day 2:
+One important observation from Day 2 is that synthesis tools automatically optimize logic while preserving functionality.
 
-## Synthesis tools optimize logic automatically.
+Even if RTL is written one way, the synthesized gate-level implementation may look completely different internally while still producing the same output behavior.
 
-Even if RTL is written one way, synthesized hardware may look completely different internally while producing the same functionality.
+Synthesis tools perform optimizations to improve:
+- timing
+- area
+- power consumption
+- hardware efficiency
 
 ---
 
 # Multiplication Optimization
+
+Arithmetic operations written in RTL are often simplified internally by the synthesis tool.
+
+When multiplication is performed using powers of 2, synthesis tools replace multiplication hardware with shift operations because shifting requires significantly less hardware.
+
+---
 
 ## Multiplication by 2
 
@@ -419,17 +735,32 @@ Even if RTL is written one way, synthesized hardware may look completely differe
 
 RTL:
 
-```verilog
+```verilog id="n6ndvc"
 assign y = a * 2;
-```
+````
 
 Optimized as:
 
-[
+```text id="x4edkz"
 y = a << 1
-]
+```
 
-y=a\ll1
+Left shifting by 1 bit is equivalent to multiplying by 2.
+
+Instead of generating:
+
+* multiplier hardware
+* complex arithmetic circuitry
+
+the synthesis tool uses:
+
+* simple wiring shifts
+
+which reduces:
+
+* area
+* delay
+* power consumption
 
 ---
 
@@ -439,17 +770,19 @@ y=a\ll1
 
 RTL:
 
-```verilog
+```verilog id="5mb1qq"
 assign y = a * 8;
 ```
 
 Optimized as:
 
-[
+```text id="4mxjlwm"
 y = a << 3
-]
+```
 
-y=a\ll3
+Left shifting by 3 bits is equivalent to multiplying by 8.
+
+This optimization avoids unnecessary arithmetic hardware and improves implementation efficiency.
 
 ---
 
@@ -457,13 +790,16 @@ y=a\ll3
 
 ![Multiplication RTL](./mult_x.v.png)
 
-The synthesis tool detects multiplication by powers of 2 and replaces them with shift operations.
+The synthesis tool detects multiplication by powers of 2 and automatically replaces them with shift operations.
 
 This optimization reduces:
 
-* area
+* silicon area
 * hardware complexity
 * power consumption
+* propagation delay
+
+This is one of the most common arithmetic optimizations performed during synthesis.
 
 ---
 
@@ -471,42 +807,99 @@ This optimization reduces:
 
 Even though internal gates change, functionality remains identical.
 
-Example:
+Example Boolean equivalence:
 
-[
-A + B = (A' \cdot B')'
-]
+```text id="th3j5v"
+A + B = (A' · B')'
+```
 
-A+B=(A'\cdot B')'
+This equation is derived from:
 
-An OR gate can internally be implemented using NAND gates.
+* De Morgan’s Law
 
-This is why synthesized hardware may differ from RTL structure.
+It shows that:
+
+* an OR gate
+  can be implemented using:
+* NAND gates
 
 ---
 
-# 8. Flip-Flop Coding Styles
+## NAND-Based Optimization
 
-Different RTL coding styles infer different sequential hardware.
+An OR gate may internally be synthesized using NAND gates because NAND gates are:
+
+* faster
+* smaller
+* easier to manufacture
+* commonly optimized in standard-cell libraries
+
+For example:
+
+| Logic Function | Possible Internal Implementation |
+| -------------- | -------------------------------- |
+| OR Gate        | NAND + Inverters                 |
+| AND Gate       | NAND + Inverter                  |
+| XOR Gate       | Combination of NAND Gates        |
+
+This is why synthesized hardware may differ significantly from:
+
+* RTL structure
+* original gate descriptions
+
+while still maintaining:
+
+* identical logical behavior
+
+This process is called:
+
+* logic optimization
+* Boolean optimization
+* gate-level optimization
+
+and is one of the most important tasks performed by synthesis tools.
+
+---
+
+#8. RTL Codes for Various Flip-Flop Styles
+
+![DFF RTL with Various Resets](./verilog_code_of_dff_with_various_resets.png)
+
+The above image contains RTL implementations for four different flip-flop coding styles:
+
+- Asynchronous Reset D Flip-Flop
+- Asynchronous + Synchronous Reset D Flip-Flop
+- Synchronous Reset D Flip-Flop
+- Asynchronous Set D Flip-Flop
+
+The difference between these designs mainly depends on:
+- sensitivity list
+- reset/set condition placement
+- clock dependency
+
+These small RTL differences result in different synthesized sequential hardware structures during synthesis.
 
 ---
 
 # Asynchronous Reset D Flip-Flop
 
-## RTL Code
+In asynchronous reset design:
+- reset is included in the sensitivity list
+- reset acts immediately without waiting for clock edge
 
-![DFF RTL with Various Resets](./verilog_code_of_dff_with_various_resets.png)
-
-Example:
+Example sensitivity list:
 
 ```verilog
-always @(posedge clk, posedge async_reset)
-```
+always @(posedge clk , posedge async_reset)
+````
 
-If reset becomes HIGH:
+Behavior:
 
-* output resets immediately
-* independent of clock
+| Signal Condition  | Output Behavior               |
+| ----------------- | ----------------------------- |
+| `async_reset = 1` | Output resets immediately     |
+| `posedge clk`     | Output captures input `D`     |
+| Clock inactive    | Output retains previous value |
 
 ---
 
@@ -523,13 +916,24 @@ The synthesis tool infers:
 
 # Asynchronous Set D Flip-Flop
 
-## RTL Code
+In asynchronous set design:
 
-![Async Set RTL](./verilog_code_of_dff_async_set.png)
+* set signal is included in the sensitivity list
+* output becomes HIGH immediately when set is active
 
-When async_set becomes HIGH:
+Example sensitivity list:
 
-* output becomes 1 immediately
+```verilog
+always @(posedge clk , posedge async_set)
+```
+
+Behavior:
+
+| Signal Condition | Output Behavior                 |
+| ---------------- | ------------------------------- |
+| `async_set = 1`  | Output becomes HIGH immediately |
+| `posedge clk`    | Output captures input `D`       |
+| Clock inactive   | Output retains previous value   |
 
 ---
 
@@ -539,34 +943,78 @@ When async_set becomes HIGH:
 
 The synthesized hardware contains:
 
-* asynchronous set logic
+* asynchronous set circuitry
+* D Flip-Flop storage element
 
 ---
 
 # Synchronous Reset D Flip-Flop
 
+In synchronous reset design:
+
+* reset is checked only during active clock edge
+* reset operation depends on clock transition
+
+Example sensitivity list:
+
+```verilog
+always @(posedge clk)
+```
+
+Behavior:
+
+| Signal Condition            | Output Behavior       |
+| --------------------------- | --------------------- |
+| `posedge clk` + `reset = 1` | Output resets         |
+| `posedge clk` + `reset = 0` | Output captures input |
+| No clock edge               | Output unchanged      |
+
+---
+
+## Synthesized Hardware
+
 ![Sync Reset DFF](./dff_syncres.png)
 
-In synchronous reset:
+Synchronous resets are commonly preferred in:
 
-* reset is checked only during clock edge
+* FPGA designs
+* synchronous digital systems
+* pipelined architectures
 
-Unlike asynchronous reset:
+because they simplify:
 
-* reset waits for active clock edge
+* timing analysis
+* synchronization
+* timing closure
 
 ---
 
 # Async + Sync Reset DFF
 
+In this design:
+
+* asynchronous reset acts immediately
+* synchronous reset works only during clock edge
+
+This combines both reset mechanisms in a single sequential circuit.
+
+---
+
+## Combined Reset Behavior
+
+| Condition                                  | Operation                     |
+| ------------------------------------------ | ----------------------------- |
+| Asynchronous reset active                  | Immediate reset               |
+| Synchronous reset active during clock edge | Clocked reset                 |
+| Normal operation                           | Flip-Flop captures input data |
+
+---
+
+## Synthesized Hardware
+
 ![Async + Sync Reset DFF](./dff_asyncres_syncres.png)
 
-This design combines:
-
-* asynchronous reset
-* synchronous reset
-
-showing how more complex sequential logic is synthesized.
+This demonstrates how synthesis tools infer more advanced sequential hardware directly from RTL descriptions.
 
 ---
 
@@ -577,29 +1025,58 @@ Simulation was performed using:
 * Icarus Verilog
 * GTKWave
 
+Simulation is important because it verifies:
+
+* logical correctness
+* sequential behavior
+* reset functionality
+* waveform timing
+
+before synthesis and hardware implementation.
+
 ---
 
 # Compilation
 
-```bash
+```bash id="qup77d"
 iverilog dff_asyncres.v tb_dff_asyncres.v
 ```
+
+This command:
+
+* compiles RTL code
+* compiles testbench
+* generates simulation executable
 
 ---
 
 # Run Simulation
 
-```bash
+```bash id="5gwxpg"
 ./a.out
 ```
+
+This executes the compiled simulation and generates:
+
+* waveform dump files
+* signal activity data
 
 ---
 
 # Open Waveforms
 
-```bash
+```bash id="7ctgw2"
 gtkwave tb_dff_asyncres.vcd
 ```
+
+GTKWave is used to visualize:
+
+* clock transitions
+* reset behavior
+* signal timing
+* sequential outputs
+
+Waveform analysis helps verify whether the RTL behaves as expected.
 
 ---
 
@@ -627,74 +1104,156 @@ The waveforms verify:
 * reset behavior
 * set behavior
 * sequential storage
+* data capturing on clock edges
+
+---
+
+## Waveform Observations
+
+### Clock Signal
+
+* drives sequential operation
+* determines data capture timing
+
+---
+
+### Reset Signal
+
+* forces known output state
+* initializes sequential logic
+
+---
+
+### Output Signal
+
+* changes only on valid triggering conditions
+* stores previous value between clock edges
+
+Waveform analysis is extremely important in digital design because it helps identify:
+
+* incorrect reset behavior
+* timing issues
+* functional bugs
+* unexpected state transitions
 
 ---
 
 # 11. Synthesis Flow using Yosys
 
-## Start Yosys
+Yosys is an open-source RTL synthesis tool used to convert Verilog RTL into synthesized gate-level hardware.
 
-```bash
+The synthesis flow includes:
+
+* RTL parsing
+* logic optimization
+* flip-flop inference
+* technology mapping
+* gate-level netlist generation
+
+---
+
+# Start Yosys
+
+```bash id="pd0w26"
 yosys
 ```
+
+Launches the Yosys synthesis environment.
 
 ---
 
 # Read Liberty Library
 
-```bash
+```bash id="s9a69f"
 read_liberty -lib sky130_fd_sc_hd__tt_025C_1v80.lib
 ```
+
+Loads the SKY130 standard-cell timing library.
+
+Used for:
+
+* timing-aware synthesis
+* standard-cell mapping
+* optimization decisions
 
 ---
 
 # Read RTL
 
-```bash
+```bash id="k5v7q6"
 read_verilog dff_asyncres.v
 ```
+
+Reads the Verilog RTL design into Yosys.
 
 ---
 
 # Run Synthesis
 
-```bash
+```bash id="b7psvx"
 synth -top dff_asyncres
 ```
+
+Performs:
+
+* RTL elaboration
+* logic optimization
+* flip-flop inference
+* netlist generation
 
 ---
 
 # Flip-Flop Mapping
 
-```bash
+```bash id="jlwm5q"
 dfflibmap -liberty sky130_fd_sc_hd__tt_025C_1v80.lib
 ```
 
-Maps RTL flip-flops to real SKY130 standard cells.
+Maps RTL flip-flops into real SKY130 sequential standard cells.
+
+This step converts generic RTL flip-flops into:
+
+* technology-specific hardware cells
 
 ---
 
 # Technology Mapping
 
-```bash
+```bash id="mecaj5"
 abc -liberty sky130_fd_sc_hd__tt_025C_1v80.lib
 ```
 
 Performs:
 
 * gate mapping
-* optimization
+* logic optimization
 * standard-cell selection
+* Boolean optimization
+
+The `abc` optimization engine minimizes:
+
+* area
+* delay
+* logic complexity
+
+while preserving functionality.
 
 ---
 
 # Visualize Netlist
 
-```bash
+```bash id="0k5e4r"
 show
 ```
 
 Displays synthesized gate-level schematic.
+
+This visualization helps understand:
+
+* inferred hardware
+* gate connections
+* optimization results
+* synthesized logic structure
 
 ---
 
@@ -704,13 +1263,14 @@ By the end of Day 2, the following concepts became clear:
 
 * Timing libraries are essential for synthesis and STA
 * Standard cells exist in multiple drive strengths
-* Liberty files contain timing, power, and area data
+* Liberty files contain timing, power, capacitance, and area data
 * Synthesis tools optimize hardware automatically
 * Hierarchical and flat synthesis have different tradeoffs
 * RTL coding style directly affects synthesized hardware
 * Flip-flop inference depends on always block structure
-* Multiplication by powers of 2 gets optimized into shifts
-* Functional behavior can remain same even if hardware structure changes internally
+* Multiplication by powers of 2 gets optimized into shift operations
+* Functional behavior remains identical even if internal hardware structure changes
+* Technology mapping converts RTL into real standard-cell implementations
 
 ---
 
@@ -727,20 +1287,22 @@ By the end of Day 2, the following concepts became clear:
 
 # Conclusion
 
-Day 2 provided a deeper understanding of how synthesis tools convert RTL into optimized gate-level hardware.
+Day 2 provided a deeper understanding of how synthesis tools convert RTL descriptions into optimized gate-level hardware.
 
-The workshop demonstrated:
+This workshop demonstrated:
 
-* how timing libraries guide synthesis
+* how Liberty timing libraries guide synthesis
 * how standard cells are characterized
-* how synthesis optimizes logic internally
-* how sequential elements are inferred from RTL
+* how synthesis tools optimize logic internally
+* how sequential hardware is inferred from RTL
 * how simulation verifies hardware behavior
+* how technology mapping converts RTL into SKY130 standard cells
 
 These concepts form the foundation of:
 
 * ASIC synthesis
 * timing analysis
-* gate-level design
-* physical implementation
-* RTL optimization.
+* gate-level implementation
+* physical design
+* RTL optimization
+* sequential logic design

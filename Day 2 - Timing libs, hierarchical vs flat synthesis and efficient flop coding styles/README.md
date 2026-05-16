@@ -1,47 +1,48 @@
-
 # Day 2 – Timing Libraries, Hierarchical vs Flat Synthesis & Efficient Flip-Flop Coding Styles
 
-Welcome to Day 2 of the **RTL Design and Synthesis Workshop using SKY130 PDK**.
-This session focuses on understanding how synthesis tools interpret timing libraries, optimize logic, and infer sequential hardware from Verilog RTL descriptions.
+Welcome to Day 2 of the **RTL Design and Synthesis Workshop using SKY130 PDK**.  
+This session focuses on understanding how synthesis tools interpret timing libraries, optimize logic, preserve hierarchy, and infer sequential hardware from Verilog RTL descriptions.
 
 In this day, we explored:
 
 * SKY130 timing libraries (`.lib`)
 * Standard-cell Verilog models
+* Liberty timing characterization
+* Standard-cell drive strengths
 * Hierarchical vs Flat synthesis
 * Logic optimization during synthesis
 * Various flip-flop coding styles
 * Simulation and waveform analysis
-* Synthesis flow using Yosys
+* RTL synthesis flow using Yosys
 
 ---
 
 # Contents
 
-1. Introduction to Timing Libraries
-2. SKY130 PDK Overview
-3. Understanding `tt_025C_1v80`
-4. Exploring the `.lib` File
-5. Standard Cell Verilog Models
-6. Hierarchical vs Flat Synthesis
-7. Logic Optimization During Synthesis
-8. Flip-Flop Coding Styles
-9. Simulation Flow using Icarus Verilog
-10. Synthesis Flow using Yosys
-11. Waveform Analysis
-12. Key Learnings
+1. Introduction to Timing Libraries  
+2. SKY130 PDK Overview  
+3. Understanding `tt_025C_1v80`  
+4. Exploring the `.lib` File  
+5. Standard Cell Verilog Models  
+6. Hierarchical vs Flat Synthesis  
+7. Logic Optimization During Synthesis  
+8. Flip-Flop Coding Styles  
+9. Simulation Flow using Icarus Verilog  
+10. Synthesis Flow using Yosys  
+11. Waveform Analysis  
+12. Key Learnings  
 
 ---
 
 # 1. Introduction to Timing Libraries
 
-Timing libraries are one of the most important components in ASIC design flow.
+Timing libraries are one of the most important components in ASIC design flow because they describe how standard cells behave electrically and logically under different operating conditions.
 
 The SKY130 library explored in this workshop:
 
 ```bash
 sky130_fd_sc_hd__tt_025C_1v80.lib
-```
+````
 
 The `.lib` file contains:
 
@@ -56,8 +57,23 @@ The `.lib` file contains:
 These libraries are used by:
 
 * synthesis tools
-* STA tools
+* STA (Static Timing Analysis) tools
 * optimization engines
+* technology mapping tools
+
+During synthesis, the `.lib` file helps the tool:
+
+* choose suitable standard cells
+* estimate timing delays
+* optimize critical paths
+* calculate power and area
+* perform gate-level mapping
+
+Without Liberty files:
+
+* timing analysis cannot be performed
+* synthesis cannot map RTL to real hardware cells
+* ASIC implementation becomes impossible
 
 ---
 
@@ -80,6 +96,22 @@ Used in:
 * timing analysis
 * physical design
 
+The SKY130 library contains hundreds of characterized standard cells such as:
+
+* AND gates
+* OR gates
+* multiplexers
+* buffers
+* inverters
+* flip-flops
+
+Each standard cell includes:
+
+* functional Verilog models
+* Liberty timing models
+* physical layout views
+* SPICE transistor descriptions
+
 ---
 
 # 3. Understanding `tt_025C_1v80`
@@ -94,7 +126,193 @@ This naming convention specifies the operating conditions under which the librar
 
 ---
 
-````markdown id="r8vk1z"
+## Process Corner (`tt`)
+
+The process corner represents transistor behavior after fabrication.
+
+Due to manufacturing variations, transistors fabricated on silicon may not always behave identically. Some chips may become:
+
+* faster
+* slower
+* leakier
+
+depending on the fabrication process.
+
+`tt` means:
+
+* Typical NMOS transistor
+* Typical PMOS transistor
+
+Used for:
+
+* nominal timing analysis
+* standard synthesis conditions
+
+Other process corners include:
+
+| Corner | Meaning              |
+| ------ | -------------------- |
+| `ff`   | Fast NMOS, Fast PMOS |
+| `ss`   | Slow NMOS, Slow PMOS |
+| `fs`   | Fast NMOS, Slow PMOS |
+| `sf`   | Slow NMOS, Fast PMOS |
+
+These corners are used to verify whether the circuit works correctly under different manufacturing conditions.
+
+---
+
+### Example
+
+Suppose an inverter delay is:
+
+| Process Corner | Delay  |
+| -------------- | ------ |
+| `ff`           | `14ps` |
+| `tt`           | `20ps` |
+| `ss`           | `30ps` |
+
+This means:
+
+* fast transistors switch quicker
+* slow transistors increase propagation delay
+
+ASIC designers must ensure the circuit works correctly in all corners.
+
+---
+
+## Temperature (`025C`)
+
+Defines the operating temperature during characterization.
+
+Temperature directly affects:
+
+* transistor mobility
+* switching speed
+* leakage current
+* propagation delay
+
+Higher temperature generally:
+
+* increases delay
+* increases leakage power
+* reduces switching speed
+
+---
+
+### Example
+
+Suppose an AND gate delay is:
+
+| Temperature | Delay  |
+| ----------- | ------ |
+| `25°C`      | `40ps` |
+| `85°C`      | `55ps` |
+| `125°C`     | `70ps` |
+
+As temperature increases:
+
+* transistor switching becomes slower
+* timing paths become longer
+
+---
+
+### Leakage Power Example
+
+| Temperature | Leakage Current |
+| ----------- | --------------- |
+| `25°C`      | Low             |
+| `85°C`      | Medium          |
+| `125°C`     | High            |
+
+This becomes critical in:
+
+* low-power chips
+* battery-operated devices
+* mobile processors
+
+---
+
+## Voltage (`1v80`)
+
+Defines the operating supply voltage.
+
+Voltage affects:
+
+* switching speed
+* timing performance
+* dynamic power consumption
+* noise margins
+
+Higher voltage:
+
+* improves switching speed
+* reduces propagation delay
+* increases dynamic power consumption
+
+Lower voltage:
+
+* reduces power
+* slows transistor switching
+
+---
+
+### Example
+
+Suppose a NAND gate delay is:
+
+| Voltage | Delay  |
+| ------- | ------ |
+| `1.8V`  | `35ps` |
+| `1.5V`  | `45ps` |
+| `1.2V`  | `60ps` |
+
+At lower voltage:
+
+* transistors switch slower
+* timing delay increases
+
+---
+
+### Dynamic Power Relation
+
+Dynamic power approximately follows:
+
+```text
+P ∝ V²
+```
+
+This means:
+
+* increasing voltage improves speed
+* but power consumption increases rapidly
+
+For example:
+
+* moving from `1.2V` → `1.8V`
+  can significantly increase dynamic power consumption.
+
+---
+
+## Why These Conditions Matter
+
+The same standard cell behaves differently under:
+
+* different process corners
+* different temperatures
+* different voltages
+
+Therefore, ASIC designers must verify timing under multiple operating conditions to ensure reliable chip functionality.
+
+This process is called:
+
+* PVT Analysis
+
+Where:
+
+* `P` → Process
+* `V` → Voltage
+* `T` → Temperature
+
 # 4. Exploring the `.lib` File
 
 ## Library Preview

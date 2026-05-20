@@ -76,8 +76,10 @@ assign y = a & b;
 because selecting between `b` and `0` behaves exactly like an AND gate.
 
 ---
+![opt\_checks](opt_checks.png)
+---
 
-# Lab 1 – opt_check
+# Lab – opt_check
 
 ## Verilog Code
 
@@ -101,7 +103,7 @@ The synthesis tool converted the logic into a simple AND gate.
 
 ---
 
-# Lab 2 – opt_check2
+# Lab – opt_check2
 
 ## Verilog Code
 
@@ -127,7 +129,7 @@ The synthesis tool recognized the logic as an OR operation and replaced the mult
 
 ---
 
-# Lab 3 – opt_check3
+# Lab - opt_check3
 
 ## Verilog Code
 
@@ -153,7 +155,7 @@ Nested conditional operators were simplified into a 3-input AND gate.
 
 ---
 
-# Lab 4 – opt_check4
+# Lab – opt_check4
 
 ## Verilog Code
 

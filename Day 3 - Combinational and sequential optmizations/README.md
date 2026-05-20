@@ -91,7 +91,7 @@ endmodule
 
 ## Optimized Result
 
-The synthesis tool converted the logic into a simple AND gate.
+Yosys optimized the mux-based logic into a single AND gate using constant propagation.
 
 ![opt\_check](opt_check.png)
 
@@ -274,7 +274,7 @@ If a register output remains constant, synthesis tools remove unnecessary flip-f
 # dff_const1
 
 ## Verilog Code
-```
+```verilog
 module dff_const1(input clk, input reset, output reg q);
 
 always @(posedge clk, posedge reset)
@@ -311,7 +311,7 @@ endmodule
 # dff_const2
 
 ## Verilog Code
-```
+```verilog
 module dff_const2(input clk, input reset, output reg q);
 
 always @(posedge clk, posedge reset)
@@ -354,7 +354,7 @@ in both conditions, the synthesis tool removed the flip-flop completely.
 # dff_const3
 
 ## Verilog Code
-```
+```verilog
 module dff_const3(input clk, input reset, output reg q);
 reg q1;
 
@@ -404,7 +404,7 @@ flip-flops are preserved.
 # dff_const4
 
 ## Verilog Code
-```
+```verilog
 module dff_const4(input clk, input reset, output reg q);
 reg q1;
 
@@ -449,7 +449,7 @@ The synthesis tool removes unnecessary sequential hardware and replaces outputs 
 # dff_const5
 
 ## Verilog Code
-```
+```verilog
 module dff_const5(input clk, input reset, output reg q);
 reg q1;
 
@@ -506,7 +506,7 @@ Counters are optimized depending on which bits are actually used.
 # counter_opt
 
 ## Verilog Code
-```
+```verilog
 module counter_opt (input clk , input reset , output q);
 
 reg [2:0] count;
@@ -558,7 +558,7 @@ This demonstrates unused register optimization.
 # counter_opt2
 
 ## Verilog Code
-```
+```verilog
 module counter_opt (input clk , input reset , output q);
 
 reg [2:0] count;

@@ -135,11 +135,7 @@ gtkwave tb_ternary_operator_mux.vcd
 ### Compile Synthesized Netlist with SKY130 Models
 
 ```bash
-iverilog \
-../my_lib/verilog_model/primitives.v \
-../my_lib/verilog_model/sky130_fd_sc_hd.v \
-ternary_operator_mux_netlist.v \
-tb_ternary_operator_mux.v
+iverilog ../my_lib/verilog_model/primitives.v ../my_lib/verilog_model/sky130_fd_sc_hd.v ternary_operator_mux_netlist.v tb_ternary_operator_mux.v
 ```
 
 ### Run GLS

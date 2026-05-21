@@ -1,28 +1,42 @@
 # Day 4 – GLS, Blocking vs Non-Blocking & Synthesis-Simulation Mismatch
 
 Welcome to Day 4 of the **RTL Design and Synthesis Workshop using SKY130 PDK**.
-This day focused on understanding how synthesized hardware behaves compared to RTL simulation and how improper Verilog coding styles can create mismatches between simulation and actual synthesized hardware.
+This session focused on Gate Level Simulation (GLS), synthesis-simulation mismatch scenarios, blocking vs non-blocking assignments, and common RTL coding mistakes that lead to unexpected hardware behavior after synthesis.
+
+This day also included hands-on labs using:
+
+* Icarus Verilog
+* GTKWave
+* Yosys
+* SKY130 standard cell libraries
 
 ---
 
 # Table of Contents
 
-* Gate Level Simulation (GLS)
+* Introduction to Gate Level Simulation (GLS)
+* Why GLS is Needed
+* GLS Flow using Icarus Verilog
+* RTL Simulation vs GLS
 * Synthesis-Simulation Mismatch
-* Blocking vs Non-Blocking Assignments
+* Missing Sensitivity List
+* Blocking vs Non-Blocking Statements
+* Comparison of Blocking vs Non-Blocking
+* Caveats with Blocking Statements
 * Labs and Experiments
 
   * Ternary Operator MUX
-  * Good MUX vs Bad MUX
-  * Blocking Assignment Caveat
+  * Bad MUX
+  * Good MUX
+  * Blocking Caveat Example
 * RTL vs Synthesized Netlists
+* Simulation vs GLS Waveforms
 * Gate-Level Schematics
-* Simulation vs GLS Comparison
 * Key Learnings
 
 ---
 
-# 1. Gate Level Simulation (GLS)
+# 1. Introduction to Gate Level Simulation (GLS)
 
 ## What is GLS?
 
@@ -30,94 +44,236 @@ GLS stands for:
 
 # Gate Level Simulation
 
-It is the process of simulating the synthesized gate-level netlist instead of RTL code.
+It is the process of running the testbench with the synthesized netlist as the Design Under Test (DUT).
 
-In GLS:
+Instead of simulating RTL code directly, GLS simulates:
 
-* synthesized netlist becomes the DUT
-* same testbench used for RTL can be reused
-* synthesized hardware functionality is verified
+* synthesized netlists
+* standard cell models
+* gate-level hardware representation
+
+---
+
+# Important Concept
+
+The synthesized netlist is logically equivalent to RTL code.
+
+This means:
+
+* same functionality should be preserved
+* same testbench should work correctly
+* RTL output and synthesized output should ideally match
 
 ---
 
 # Why GLS is Needed
 
-GLS helps to:
+GLS is used to:
 
-* verify synthesized hardware behavior
-* compare RTL vs synthesized implementation
+* verify logical correctness after synthesis
 * detect synthesis-simulation mismatches
-* validate logic correctness after synthesis
-* analyze timing-aware behavior
+* validate synthesized hardware functionality
+* analyze gate-level behavior
+* ensure timing correctness
 
 ---
 
-# GLS Flow
+# Timing-Aware GLS
+
+For accurate timing verification:
+
+# GLS should be run with delay annotation
+
+This helps in:
+
+* setup/hold analysis
+* propagation delay checking
+* timing validation
+
+---
+
+# GLS Flow using Icarus Verilog
 
 ```text
-RTL / Synthesized Netlist
-            ↓
-        Icarus Verilog
-            ↓
-           VCD
-            ↓
-         GTKWave
+Design / Netlist + Standard Cell Verilog Models + Testbench
+                                ↓
+                             Icarus Verilog
+                                ↓
+                              VCD Dump
+                                ↓
+                              GTKWave
 ```
 
 ---
 
-# Types of GLS
+# GLS using Icarus Verilog
 
-## Functional GLS
+## RTL Simulation
 
-* Logic-only verification
-* Zero/unit delay simulation
+### Compile RTL and Testbench
 
-## Timing GLS
+```bash
+iverilog ternary_operator_mux.v tb_ternary_operator_mux.v
+```
 
-* Uses SDF timing annotation
-* Checks setup/hold timing behavior
+### Run Simulation
+
+```bash
+./a.out
+```
+
+### Open GTKWave
+
+```bash
+gtkwave tb_ternary_operator_mux.vcd
+```
+
+---
+
+## Gate Level Simulation (GLS)
+
+### Compile Synthesized Netlist with SKY130 Models
+
+```bash
+iverilog \
+../my_lib/verilog_model/primitives.v \
+../my_lib/verilog_model/sky130_fd_sc_hd.v \
+ternary_operator_mux_netlist.v \
+tb_ternary_operator_mux.v
+```
+
+### Run GLS
+
+```bash
+./a.out
+```
+
+### Open GTKWave
+
+```bash
+gtkwave tb_ternary_operator_mux.vcd
+```
+
+---
+
+# RTL Simulation vs Gate Level Simulation (GLS)
+
+| Feature                    | RTL Simulation          | Gate Level Simulation       |
+| -------------------------- | ----------------------- | --------------------------- |
+| DUT                        | RTL Code                | Synthesized Netlist         |
+| Abstraction Level          | Behavioral              | Gate-level                  |
+| Uses Standard Cells        | No                      | Yes                         |
+| Timing Awareness           | Usually no              | Can include delays          |
+| Simulation Speed           | Faster                  | Slower                      |
+| Main Purpose               | Functional verification | Post-synthesis verification |
+| Detects Synthesis Mismatch | Limited                 | Yes                         |
 
 ---
 
 # Important Observation
 
-Simulator works based on:
+Gate-level Verilog models can be:
 
-# activity/events
+* timing aware
+* functional only
 
-Synthesizer focuses mainly on:
+In this workshop mainly:
 
-* hardware inference
-* logic optimization
+# functional GLS
 
-This difference can cause:
+was used.
 
-# Synthesis-Simulation Mismatch
+---
+
+# Example Hardware Mapping
+
+RTL:
+
+```verilog
+assign y = (a | b) & c;
+```
+
+can synthesize into:
+
+* OR gate
+* AND gate
+
+or optimized standard cells after synthesis.
 
 ---
 
 # 2. Synthesis-Simulation Mismatch
 
-A synthesis-simulation mismatch occurs when:
+Even if the netlist is a true representation of RTL,
+mismatches can still occur because:
 
-```text
-RTL Simulation ≠ Synthesized Hardware Behavior
-```
+# simulator and synthesizer interpret RTL differently
 
 ---
 
-# Common Reasons
+# Common Reasons for Mismatch
 
 * Missing sensitivity list
-* Incorrect blocking/non-blocking assignments
-* Improper combinational coding style
-* Ambiguous RTL coding
-* Tool interpretation differences
+* Incorrect blocking assignments
+* Wrong use of non-blocking assignments
+* Non-standard Verilog coding styles
+* Improper combinational logic description
 
 ---
 
-# 3. Blocking vs Non-Blocking Assignments
+# Missing Sensitivity List
+
+## How Simulator Works
+
+Simulator works based on:
+
+# activity/events
+
+The always block executes only when signals inside the sensitivity list change.
+
+---
+
+# Example
+
+```verilog
+always @(sel)
+```
+
+The block executes only when:
+
+```text
+sel changes
+```
+
+Changes in:
+
+* `i0`
+* `i1`
+
+will NOT trigger execution.
+
+This creates incorrect RTL simulation behavior.
+
+---
+
+# Important Observation
+
+# Synthesizer does NOT care about sensitivity list
+
+Synthesizer looks only at:
+
+* logic functionality
+* hardware inference
+
+This creates:
+
+# Synthesis-Simulation Mismatch
+
+---
+
+# 3. Blocking vs Non-Blocking Statements
+
+Inside always blocks:
 
 ---
 
@@ -125,20 +281,30 @@ RTL Simulation ≠ Synthesized Hardware Behavior
 
 ## Characteristics
 
-* Executes sequentially
-* Order matters
+* Executes statements sequentially
+* First statement executes before second statement
 * Immediate assignment
 
-## Used For
+## Mainly Used For
 
-# Combinational Logic
+# combinational logic
 
-## Example
+---
+
+# Example
 
 ```verilog
-always @(*)
-    y = a & b;
+a = b + c;
+d = a + f;
 ```
+
+Here:
+
+* second statement uses updated value of `a`
+
+Execution is:
+
+# sequential
 
 ---
 
@@ -146,32 +312,53 @@ always @(*)
 
 ## Characteristics
 
-* Executes in parallel
-* Updates scheduled together
-* Mimics flip-flop behavior
+* Evaluates all RHS together
+* Updates LHS later
+* Parallel execution behavior
 
-## Used For
+## Mainly Used For
 
-# Sequential Logic
-
-## Example
-
-```verilog
-always @(posedge clk)
-    q <= d;
-```
+# sequential logic
 
 ---
 
-# Comparison Table
+# Example
 
-| Blocking (`=`)              | Non-Blocking (`<=`)         |
-| --------------------------- | --------------------------- |
-| Sequential execution        | Parallel execution          |
-| Immediate update            | Scheduled update            |
-| Used in combinational logic | Used in sequential logic    |
-| Order dependent             | Order independent           |
-| Infers combinational gates  | Infers flip-flops/registers |
+```verilog
+a <= b + c;
+d <= a + f;
+```
+
+Both RHS expressions evaluate simultaneously.
+
+This models:
+
+# flip-flop/register behavior
+
+correctly.
+
+---
+
+# Important Rule
+
+## Use:
+
+* `=` for combinational logic
+* `<=` for sequential logic
+
+---
+
+# Blocking vs Non-Blocking Assignment Comparison
+
+| Feature              | Blocking (`=`)        | Non-Blocking (`<=`)     |
+| -------------------- | --------------------- | ----------------------- |
+| Execution Style      | Sequential            | Parallel                |
+| Assignment Timing    | Immediate             | Scheduled               |
+| Statement Dependency | Order dependent       | Order independent       |
+| Used For             | Combinational logic   | Sequential logic        |
+| Hardware Modeling    | Logic gates           | Flip-flops/registers    |
+| Simulation Behavior  | Executes line-by-line | Evaluates RHS together  |
+| Recommended Usage    | `always @(*)`         | `always @(posedge clk)` |
 
 ---
 
@@ -198,22 +385,15 @@ endmodule
 
 ---
 
-# Observation
-
-The ternary operator:
+# Ternary Operator
 
 ```verilog
 condition ? TRUE : FALSE
 ```
 
-implements:
+Implements:
 
 # 2:1 Multiplexer
-
-Behavior:
-
-* `sel = 1` → `y = i1`
-* `sel = 0` → `y = i0`
 
 ---
 
@@ -223,9 +403,9 @@ Behavior:
 
 ### Observation
 
-* RTL converted into SKY130 standard cells
-* Yosys inferred `sky130_fd_sc_hd__mux2_1`
-* Synthesized hardware matches intended RTL functionality
+* RTL synthesized into SKY130 mux standard cell
+* `sky130_fd_sc_hd__mux2_1` inferred successfully
+* Synthesized hardware matches RTL functionality
 
 ---
 
@@ -236,8 +416,8 @@ Behavior:
 ### Observation
 
 * Inputs connected to mux standard cell
-* Proper hardware inference observed
-* SKY130 mux cell successfully generated
+* Proper mux hardware generated
+* Standard cell implementation verified
 
 ---
 
@@ -249,11 +429,11 @@ Behavior:
 
 * RTL and GLS outputs match correctly
 * Functional verification successful
-* No synthesis mismatch observed
+* No mismatch observed
 
 ---
 
-# Lab 2 – Bad MUX Example
+# Lab 2 – Bad MUX
 
 ## RTL Code
 
@@ -278,11 +458,16 @@ endmodule
 
 ---
 
-# Problems in RTL
+# Problems in This RTL
 
-## Missing Sensitivity List
+* Missing sensitivity list
+* Incorrect use of non-blocking assignment in combinational logic
 
-The always block triggers only when:
+---
+
+# Why This is Wrong
+
+The block executes only when:
 
 ```text
 sel changes
@@ -293,39 +478,7 @@ Changes in:
 * `i0`
 * `i1`
 
-will not update output correctly.
-
----
-
-# Incorrect Assignment Type
-
-Using:
-
-```verilog
-<=
-```
-
-inside combinational logic is not recommended.
-
-Combinational logic should use:
-
-```verilog
-=
-```
-
----
-
-# Correct RTL
-
-```verilog
-always @(*)
-begin
-    if(sel)
-        y = i1;
-    else
-        y = i0;
-end
-```
+will not update output properly.
 
 ---
 
@@ -336,19 +489,19 @@ end
 ### Observation
 
 * Synthesizer still infers proper mux hardware
-* Hardware implementation remains correct
-* Sensitivity list issue mainly affects simulation
+* Hardware implementation correct
+* Issue exists mainly during simulation
 
 ---
 
-# Simulation vs Synthesis
+# Simulation vs GLS
 
 ![Bad MUX Simulation vs Synthesis](bad_mux_simulation_vs_synthesis.png)
 
 ### Observation
 
-* RTL simulation may fail to update output properly
-* GLS behaves as expected
+* RTL simulation output may not update correctly
+* GLS behaves correctly
 * Demonstrates synthesis-simulation mismatch
 
 ---
@@ -359,12 +512,26 @@ end
 
 ### Observation
 
-* SKY130 mux cell inferred successfully
-* Hardware generated correctly despite poor coding style
+* SKY130 mux cell inferred correctly
+* Synthesized hardware remains functionally correct
 
 ---
 
-# Lab 3 – Good MUX Example
+# Good MUX vs Bad MUX
+
+| Feature                    | Bad MUX             | Good MUX            |
+| -------------------------- | ------------------- | ------------------- |
+| Sensitivity List           | `@(sel)`            | `@(*)`              |
+| Assignment Type            | Non-blocking (`<=`) | Blocking (`=`)      |
+| Combinational Logic Style  | Incorrect           | Correct             |
+| RTL Simulation Accuracy    | May fail            | Correct             |
+| GLS Output                 | Correct             | Correct             |
+| Synthesis Result           | Proper mux inferred | Proper mux inferred |
+| Simulation-Synthesis Match | Possible mismatch   | No mismatch         |
+
+---
+
+# Lab 3 – Good MUX
 
 ## RTL Code
 
@@ -401,7 +568,7 @@ This ensures:
 
 * proper combinational logic
 * correct output updates
-* accurate simulation behavior
+* accurate simulation
 
 ---
 
@@ -411,9 +578,9 @@ This ensures:
 
 ### Observation
 
-* Clean combinational RTL style
-* Correct mux inference
-* Synthesized netlist matches RTL intent
+* Proper combinational coding style used
+* Synthesized mux matches RTL intent
+* No mismatch observed
 
 ---
 
@@ -423,9 +590,8 @@ This ensures:
 
 ### Observation
 
-* RTL and GLS outputs match correctly
-* No mismatch observed
-* Proper combinational behavior verified
+* RTL and GLS outputs match perfectly
+* Correct combinational behavior verified
 
 ---
 
@@ -435,12 +601,68 @@ This ensures:
 
 ### Observation
 
-* SKY130 mux standard cell inferred correctly
-* Functional hardware implementation verified
+* SKY130 mux standard cell inferred successfully
 
 ---
 
-# Lab 4 – Blocking Assignment Caveat
+# 5. Caveats with Blocking Statements
+
+---
+
+# Sequential Logic Caveat
+
+## Problematic RTL
+
+```verilog
+always @(posedge clk)
+begin
+    q0 = d;
+    q  = q0;
+end
+```
+
+---
+
+# Problem
+
+Execution occurs sequentially:
+
+1. `q0` immediately gets `d`
+2. `q` immediately gets updated `q0`
+
+Simulation behaves like:
+
+```text
+q = d
+```
+
+instead of delayed pipeline behavior.
+
+---
+
+# Correct RTL
+
+```verilog
+always @(posedge clk)
+begin
+    q0 <= d;
+    q  <= q0;
+end
+```
+
+---
+
+# Observation
+
+Non-blocking assignment:
+
+* models flip-flops correctly
+* performs parallel register updates
+* matches sequential hardware behavior
+
+---
+
+# Combinational Logic Caveat
 
 ## Problematic RTL
 
@@ -467,14 +689,11 @@ endmodule
 
 # Problem
 
-Execution occurs sequentially:
+`d` uses:
 
-1. `d` uses old value of `x`
-2. `x` updates afterward
+# old value of x
 
-Simulation becomes:
-
-# order dependent
+because blocking assignments execute sequentially.
 
 ---
 
@@ -490,21 +709,15 @@ end
 
 ---
 
-# Observation
-
-Intermediate variables should always be assigned before usage.
-
----
-
 # RTL vs Synthesized Netlist
 
 ![Blocking Caveat RTL vs Synthesized](blocking_caveat_rtl_vs_synthesized_netlist.png)
 
 ### Observation
 
-* Synthesis optimizes logic into combinational gates
-* Hardware still synthesized correctly
-* Statement ordering affects simulation more than synthesis
+* Synthesis optimizes logic correctly
+* Hardware implementation simplified
+* Simulation affected by statement ordering
 
 ---
 
@@ -514,8 +727,8 @@ Intermediate variables should always be assigned before usage.
 
 ### Observation
 
-* RTL simulation depends on statement ordering
-* GLS behaves according to optimized hardware
+* RTL simulation depends on execution order
+* GLS follows synthesized hardware behavior
 * Blocking assignment caveat demonstrated clearly
 
 ---
@@ -526,8 +739,7 @@ Intermediate variables should always be assigned before usage.
 
 ### Observation
 
-* Optimized combinational logic generated
-* Synthesized hardware simplified successfully
+* Optimized combinational logic generated successfully
 
 ---
 
@@ -557,41 +769,42 @@ write_verilog
 
 This Day 4 repository includes:
 
-* RTL Codes
+* RTL codes
 * Testbenches
-* RTL Simulation Waveforms
-* GLS Waveforms
-* RTL vs Synthesized Netlists
-* Gate-Level Schematics
-* SKY130 Standard Cell Implementations
-* Handwritten Notes
-* Lab Outputs and Observations
+* GLS outputs
+* GTKWave screenshots
+* RTL vs synthesized netlists
+* Gate-level schematics
+* SKY130 standard cell mapping
+* Theory notes
+* Lab observations
 
 ---
 
 # Key Learnings
 
 * GLS verifies synthesized hardware behavior.
-* Missing sensitivity lists can cause simulation mismatch.
-* Synthesizer and simulator interpret RTL differently.
-* Blocking assignments are order dependent.
-* Non-blocking assignments are preferred for sequential logic.
+* Simulator works based on activity/events.
+* Synthesizer ignores sensitivity lists.
+* Missing sensitivity lists can cause mismatch.
+* Blocking assignments are sequential.
+* Non-blocking assignments are parallel.
 * `always @(*)` should be used for combinational logic.
-* Proper RTL coding style improves predictability and hardware correctness.
+* `<=` should be used for sequential logic.
+* Poor RTL coding style can create simulation mismatch even when synthesized hardware is correct.
 * SKY130 standard cells are inferred during synthesis.
 
 ---
 
-# Summary
+# Conclusion
 
 Day 4 provided practical understanding of:
 
 * Gate Level Simulation (GLS)
-* Synthesized netlist behavior
 * RTL vs synthesized hardware comparison
+* Synthesis-simulation mismatch
 * Blocking and non-blocking assignments
-* Simulation mismatch causes
-* Verilog coding pitfalls
-* Proper RTL coding practices using SKY130 libraries
+* Combinational and sequential RTL coding styles
+* Gate-level verification using SKY130 standard cells
 
-along with hands-on labs, waveform analysis, synthesized netlists, and gate-level schematics.
+along with hands-on experiments, waveform analysis, synthesized netlists, and gate-level schematic visualization.

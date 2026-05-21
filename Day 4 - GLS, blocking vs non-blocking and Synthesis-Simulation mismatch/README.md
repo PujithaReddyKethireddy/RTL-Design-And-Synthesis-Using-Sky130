@@ -42,7 +42,7 @@ This day also included hands-on labs using:
 
 GLS stands for:
 
-# Gate Level Simulation
+## Gate Level Simulation
 
 It is the process of running the testbench with the synthesized netlist as the Design Under Test (DUT).
 
@@ -54,7 +54,7 @@ Instead of simulating RTL code directly, GLS simulates:
 
 ---
 
-# Important Concept
+## Important Concept
 
 The synthesized netlist is logically equivalent to RTL code.
 
@@ -66,7 +66,7 @@ This means:
 
 ---
 
-# Why GLS is Needed
+## Why GLS is Needed
 
 GLS is used to:
 
@@ -92,7 +92,7 @@ This helps in:
 
 ---
 
-# GLS Flow using Icarus Verilog
+## GLS Flow using Icarus Verilog
 
 ```text
 Design / Netlist + Standard Cell Verilog Models + Testbench
@@ -152,7 +152,7 @@ gtkwave tb_ternary_operator_mux.vcd
 
 ---
 
-# RTL Simulation vs Gate Level Simulation (GLS)
+## RTL Simulation vs Gate Level Simulation (GLS)
 
 | Feature                    | RTL Simulation          | Gate Level Simulation       |
 | -------------------------- | ----------------------- | --------------------------- |
@@ -166,7 +166,7 @@ gtkwave tb_ternary_operator_mux.vcd
 
 ---
 
-# Important Observation
+## Important Observation
 
 Gate-level Verilog models can be:
 
@@ -175,13 +175,13 @@ Gate-level Verilog models can be:
 
 In this workshop mainly:
 
-# functional GLS
+## functional GLS
 
 was used.
 
 ---
 
-# Example Hardware Mapping
+## Example Hardware Mapping
 
 RTL:
 
@@ -203,11 +203,11 @@ or optimized standard cells after synthesis.
 Even if the netlist is a true representation of RTL,
 mismatches can still occur because:
 
-# simulator and synthesizer interpret RTL differently
+## simulator and synthesizer interpret RTL differently
 
 ---
 
-# Common Reasons for Mismatch
+## Common Reasons for Mismatch
 
 * Missing sensitivity list
 * Incorrect blocking assignments
@@ -217,19 +217,19 @@ mismatches can still occur because:
 
 ---
 
-# Missing Sensitivity List
+## Missing Sensitivity List
 
 ## How Simulator Works
 
 Simulator works based on:
 
-# activity/events
+## activity/events
 
 The always block executes only when signals inside the sensitivity list change.
 
 ---
 
-# Example
+## Example
 
 ```verilog
 always @(sel)
@@ -252,9 +252,9 @@ This creates incorrect RTL simulation behavior.
 
 ---
 
-# Important Observation
+## Important Observation
 
-# Synthesizer does NOT care about sensitivity list
+## Synthesizer does NOT care about sensitivity list
 
 Synthesizer looks only at:
 
@@ -263,7 +263,7 @@ Synthesizer looks only at:
 
 This creates:
 
-# Synthesis-Simulation Mismatch
+## Synthesis-Simulation Mismatch
 
 ---
 
@@ -273,21 +273,21 @@ Inside always blocks:
 
 ---
 
-# Blocking Assignment (`=`)
+## Blocking Assignment (`=`)
 
-## Characteristics
+### Characteristics
 
 * Executes statements sequentially
 * First statement executes before second statement
 * Immediate assignment
 
-## Mainly Used For
+### Mainly Used For
 
-# combinational logic
+## combinational logic
 
 ---
 
-# Example
+## Example
 
 ```verilog
 a = b + c;
@@ -300,25 +300,25 @@ Here:
 
 Execution is:
 
-# sequential
+## sequential
 
 ---
 
-# Non-Blocking Assignment (`<=`)
+## Non-Blocking Assignment (`<=`)
 
-## Characteristics
+### Characteristics
 
 * Evaluates all RHS together
 * Updates LHS later
 * Parallel execution behavior
 
-## Mainly Used For
+### Mainly Used For
 
-# sequential logic
+## sequential logic
 
 ---
 
-# Example
+## Example
 
 ```verilog
 a <= b + c;
@@ -329,22 +329,22 @@ Both RHS expressions evaluate simultaneously.
 
 This models:
 
-# flip-flop/register behavior
+## flip-flop/register behavior
 
 correctly.
 
 ---
 
-# Important Rule
+## Important Rule
 
-## Use:
+### Use:
 
 * `=` for combinational logic
 * `<=` for sequential logic
 
 ---
 
-# Blocking vs Non-Blocking Assignment Comparison
+## Blocking vs Non-Blocking Assignment Comparison
 
 | Feature              | Blocking (`=`)        | Non-Blocking (`<=`)     |
 | -------------------- | --------------------- | ----------------------- |

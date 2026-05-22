@@ -1,4 +1,3 @@
-
 # RTL Design And Synthesis Workshop Using SKY130
 
 <div align="center">
@@ -12,246 +11,247 @@
 
 ---
 
+
 # 📌 About The Workshop
 
-Welcome to the **RTL Design And Synthesis Workshop Using SKY130**.
+Welcome to the **RTL Design And Synthesis Workshop Using SKY130** repository.
 
-This repository contains complete hands-on documentation, RTL designs, simulations, synthesis results, optimizations, Gate-Level Simulation (GLS), waveform analysis, and SKY130 standard-cell based ASIC design flow using open-source EDA tools.
+This repository contains complete hands-on documentation, RTL designs, simulations, synthesis results, waveform analysis, Gate-Level Simulation (GLS), synthesis optimization techniques, and SKY130 standard-cell based ASIC design flow using open-source EDA tools.
 
-This workshop focuses on:
+The workshop demonstrates the complete RTL-to-Gate-Level design flow using:
 
-- Verilog RTL Design
-- RTL Simulation using Icarus Verilog
-- Waveform Analysis using GTKWave
-- Logic Synthesis using Yosys
-- SKY130 Standard Cell Libraries
-- Timing Libraries and Liberty Files
-- Combinational and Sequential Optimization
-- Gate-Level Simulation (GLS)
-- Blocking vs Non-Blocking Assignments
-- Latch Inference
-- Generate Blocks and Scalable RTL Design
+* Verilog HDL
+* Icarus Verilog
+* GTKWave
+* Yosys
+* SKY130 Standard Cell Libraries
+* Open-source ASIC synthesis flow
 
 ---
 
-# 📚 Table of Contents
+# 🎯 Workshop Objectives
 
-- [About This Workshop](#-about-the-workshop)
-- [Prerequisites](#-prerequisites)
-- [Tools Used](#️-tools-used)
-- [Workshop Structure](#-workshop-structure)
-- [RTL Design Flow](#-rtl-design-flow)
-- [Important Concepts Covered](#-important-concepts-covered)
-- [Common Commands Used](#️-common-commands-used)
-- [Major Comparisons](#-major-comparisons)
-- [Skills Gained](#-skills-gained)
-- [Author](#-author)
-- [Acknowledgements](#-acknowledgements)
-- [Conclusion](#-conclusion)
+The main objectives of this workshop are:
 
----
-
-# 📖 Prerequisites
-
-- Basic understanding of digital electronics
-- Familiarity with logic gates and flip-flops
-- Basic Linux command-line knowledge
-- Verilog HDL basics
-- Installed tools:
-  - `iverilog`
-  - `gtkwave`
-  - `yosys`
-  - `git`
+* Understand Verilog RTL design fundamentals
+* Learn RTL simulation and waveform verification
+* Understand synthesis using Yosys
+* Explore SKY130 timing libraries and standard cells
+* Learn combinational and sequential optimizations
+* Perform Gate-Level Simulation (GLS)
+* Understand synthesis-simulation mismatches
+* Analyze latch inference and coding styles
+* Build scalable RTL designs using generate blocks
+* Understand synthesis-aware RTL coding practices
 
 ---
 
-# 🛠️ Tools Used
-
-| Tool | Purpose |
-|---|---|
-| Icarus Verilog (iverilog) | RTL & GLS Simulation |
-| GTKWave | Waveform Analysis |
-| Yosys | Logic Synthesis |
-| SKY130 PDK | Standard Cell Library |
-| Linux Terminal | Command Execution |
-| Git & GitHub | Version Control |
-
----
-# 📂 Workshop Structure
-
-The workshop is organized day-wise, each with a dedicated folder and README:
-
-- [Day 1 - Introduction to Verilog RTL design and Synthesis](./Day%201%20-%20Introduction%20to%20Verilog%20RTL%20design%20and%20Synthesis/README.md)
-
-- [Day 2 - Timing libs, hierarchical vs flat synthesis and efficient flop coding styles](./Day%202%20-%20Timing%20libs,%20hierarchical%20vs%20flat%20synthesis%20and%20efficient%20flop%20coding%20styles/README.md)
-
-- [Day 3 - Combinational and sequential optimizations](./Day%203%20-%20Combinational%20and%20sequential%20optimizations/README.md)
-
-- [Day 4 - GLS, blocking vs non-blocking and Synthesis-Simulation mismatch](./Day%204%20-%20GLS,%20blocking%20vs%20non-blocking%20and%20Synthesis-Simulation%20mismatch/README.md)
-
-- [Day 5 - Optimization in synthesis](./Day%205%20-%20Optimization%20in%20synthesis/README.md)
-  
-Each day’s README includes:
-
-- Detailed theory explanations
-- Step-by-step practical labs
-- RTL codes and screenshots
-- Waveform analysis
-- Synthesized netlists
-- Observations and conclusions
-- Optimization techniques
-- SKY130 technology mapping
-
----
-
-# 🔄 RTL Design Flow
+# 🧭 Complete RTL Design Flow
 
 ```text
 Specification
       ↓
 RTL Design (Verilog)
       ↓
-RTL Simulation
+RTL Simulation using Icarus Verilog
       ↓
-Waveform Verification
+Waveform Verification using GTKWave
       ↓
 Logic Synthesis using Yosys
       ↓
-Technology Mapping
+Technology Mapping using SKY130
       ↓
-Gate-Level Netlist
+Gate-Level Netlist Generation
       ↓
 Gate-Level Simulation (GLS)
       ↓
 Optimization & Verification
-````
-
----
-
-# 🧠 Important Concepts Covered
-
-## RTL Simulation
-
-RTL simulation verifies functionality before hardware implementation.
-
-### Key Learnings
-
-* Testbench writing
-* Functional verification
-* Waveform analysis
-* Debugging RTL behavior
-
----
-
-## Logic Synthesis
-
-Synthesis converts RTL into gate-level hardware using SKY130 standard cells.
-
-### Key Learnings
-
-* Technology mapping
-* Logic optimization
-* Standard-cell inference
-* Timing-aware synthesis
-
----
-
-## Timing Libraries
-
-The SKY130 Liberty `.lib` files contain:
-
-* Timing information
-* Area information
-* Leakage power
-* Capacitance data
-* Transition delays
-
-### Important Concepts
-
-* PVT Analysis
-* Setup timing
-* Hold timing
-* Drive strength optimization
-
----
-
-## Combinational Optimization
-
-Covered techniques:
-
-* Constant propagation
-* Boolean simplification
-* Dead logic elimination
-* Multi-module optimization
-
----
-
-## Sequential Optimization
-
-Covered techniques:
-
-* Register optimization
-* Counter optimization
-* Sequential constant propagation
-* Flip-flop inference
-
----
-
-## Gate-Level Simulation (GLS)
-
-GLS verifies synthesized hardware functionality.
-
-### GLS Flow
-
-```bash
-iverilog primitives.v sky130_fd_sc_hd.v synthesized_netlist.v testbench.v
-./a.out
-gtkwave waveform.vcd
 ```
 
-### Importance
+---
 
-* Detect synthesis mismatch
-* Verify synthesized hardware
-* Validate gate-level functionality
+# 📂 Repository Structure
+
+```text
+RTL-Design-And-Synthesis-Workshop-Using-SKY130/
+│
+├── Day 1 - Introduction to Verilog RTL design and Synthesis/
+├── Day 2 - Timing libs, hierarchical vs flat synthesis and efficient flop coding styles/
+├── Day 3 - Combinational and sequential optimizations/
+├── Day 4 - GLS, blocking vs non-blocking and Synthesis-Simulation mismatch/
+├── Day 5 - Optimization in synthesis/
+│
+└── README.md
+```
 
 ---
 
-## Blocking vs Non-Blocking Assignments
+# 📚 Table of Contents
 
-### Blocking (`=`)
-
-* Sequential execution
-* Mainly used for combinational logic
-
-### Non-Blocking (`<=`)
-
-* Parallel execution
-* Mainly used for sequential logic
-
----
-
-## Latch Inference
-
-Incomplete IF/CASE statements infer latches because outputs retain previous values.
-
-### Important Learning
-
-Always assign outputs under all conditions to avoid unintended latches.
+* [About The Workshop](#-about-the-workshop)
+* [Workshop Objectives](#-workshop-objectives)
+* [RTL Design Flow](#-complete-rtl-design-flow)
+* [Repository Structure](#-repository-structure)
+* [Prerequisites](#-prerequisites)
+* [Installation](#️-installation)
+* [Tools Used](#️-tools-used)
+* [Workshop Structure](#-workshop-structure)
+* [Quick Start](#-quick-start)
+* [Major Concepts Covered](#-major-concepts-covered)
+* [Important Comparisons](#-important-comparisons)
+* [Skills Demonstrated](#-skills-demonstrated)
+* [Author](#-author)
+* [Acknowledgements](#-acknowledgements)
+* [Conclusion](#-conclusion)
 
 ---
 
-## FOR vs FOR GENERATE
+# 📖 Prerequisites
 
-| FOR Loop                 | FOR GENERATE              |
-| ------------------------ | ------------------------- |
-| Behavioral               | Structural                |
-| Used inside always block | Used outside always block |
-| Logic iteration          | Hardware replication      |
+Before starting this workshop, basic understanding of the following concepts is helpful:
+
+* Digital Electronics
+* Logic Gates
+* Flip-Flops
+* Linux Terminal Commands
+* Verilog HDL Basics
+* Digital Logic Design
 
 ---
 
-# 🖥️ Common Commands Used
+# 🛠️ Installation
+
+## Install Icarus Verilog
+
+```bash
+sudo apt install iverilog
+```
+
+---
+
+## Install GTKWave
+
+```bash
+sudo apt install gtkwave
+```
+
+---
+
+## Install Yosys
+
+```bash
+sudo apt install yosys
+```
+
+---
+
+## Install Git
+
+```bash
+sudo apt install git
+```
+
+---
+
+## Clone Workshop Repository
+
+```bash
+git clone https://github.com/kunalg123/sky130RTLDesignAndSynthesisWorkshop.git
+```
+
+---
+
+# 🖥️ Tools Used
+
+| Tool                      | Purpose                 |
+| ------------------------- | ----------------------- |
+| Icarus Verilog (iverilog) | RTL & GLS Simulation    |
+| GTKWave                   | Waveform Analysis       |
+| Yosys                     | Logic Synthesis         |
+| SKY130 PDK                | Standard Cell Libraries |
+| Linux Terminal            | Command Execution       |
+| Git & GitHub              | Version Control         |
+
+---
+
+# 📂 Workshop Structure
+
+## Day 1 – Introduction to Verilog RTL Design and Synthesis
+
+Topics Covered:
+
+* Simulator, Design, and Testbench
+* RTL Simulation using Icarus Verilog
+* Waveform Analysis using GTKWave
+* Introduction to Logic Synthesis
+* SKY130 Standard Cell Libraries
+* Timing Concepts
+* Synthesis using Yosys
+* Gate-Level Netlist Generation
+
+---
+
+## Day 2 – Timing Libraries, Hierarchical vs Flat Synthesis & Efficient Flip-Flop Coding Styles
+
+Topics Covered:
+
+* Liberty Timing Libraries
+* SKY130 PDK Overview
+* Standard Cell Characterization
+* Drive Strength Analysis
+* Hierarchical vs Flat Synthesis
+* Logic Optimization
+* Flip-Flop Coding Styles
+* Technology Mapping
+
+---
+
+## Day 3 – Combinational and Sequential Optimizations
+
+Topics Covered:
+
+* Constant Propagation
+* Boolean Simplification
+* Dead Logic Elimination
+* Multi-Module Optimization
+* Sequential Optimization
+* Counter Optimization
+* Register Optimization
+* Optimization-aware RTL Coding
+
+---
+
+## Day 4 – GLS, Blocking vs Non-Blocking & Synthesis-Simulation Mismatch
+
+Topics Covered:
+
+* Gate-Level Simulation (GLS)
+* RTL vs GLS Verification
+* Missing Sensitivity List
+* Blocking vs Non-Blocking Assignments
+* Synthesis-Simulation Mismatch
+* Correct RTL Coding Styles
+* Gate-Level Verification
+
+---
+
+## Day 5 – Optimization in Synthesis
+
+Topics Covered:
+
+* IF Constructs
+* CASE Constructs
+* Incomplete IF and CASE Statements
+* Latch Inference
+* FOR vs FOR GENERATE
+* MUX & DEMUX Design
+* Generate-based Hardware Replication
+* Ripple Carry Adder using Generate
+* Gate-Level Simulation
+
+---
+
+# 🚀 Quick Start
 
 ## RTL Simulation
 
@@ -281,10 +281,10 @@ show
 
 ---
 
-## Gate-Level Simulation
+## Gate-Level Simulation (GLS)
 
 ```bash
-iverilog  primitives.v sky130_fd_sc_hd.v design_netlist.v testbench.v
+iverilog primitives.v sky130_fd_sc_hd.v design_netlist.v testbench.v
 
 ./a.out
 
@@ -293,51 +293,129 @@ gtkwave waveform.vcd
 
 ---
 
-# 📊 Major Comparisons
+# 🧠 Major Concepts Covered
 
-| Comparison                       | Observation                     |
-| -------------------------------- | ------------------------------- |
-| RTL vs GLS                       | GLS uses synthesized hardware   |
-| Blocking vs Non-Blocking         | Sequential vs Parallel behavior |
-| Hierarchical vs Flat Synthesis   | Debuggability vs Optimization   |
-| Complete vs Incomplete CASE      | No latch vs Latch inference     |
-| FOR vs FOR GENERATE              | Behavioral vs Structural        |
-| Optimized vs Non-Optimized Logic | Reduced gates and area          |
+## RTL Simulation
+
+* Functional verification
+* Waveform analysis
+* Testbench development
+* Signal monitoring
 
 ---
 
-# 🚀 Skills Gained
+## Logic Synthesis
 
-* Verilog RTL Coding
-* Logic Synthesis
-* Gate-Level Simulation
-* Timing Library Understanding
-* Sequential Logic Design
-* Optimization Techniques
-* Yosys Synthesis Flow
-* Waveform Analysis
-* Linux-based ASIC Flow
-* SKY130 Standard Cell Mapping
+* RTL to Gate-Level conversion
+* Technology mapping
+* Logic optimization
+* Standard-cell inference
 
 ---
 
-# 🌟 Repository Highlights
+## Timing Libraries
 
-✅ Complete Day-wise Documentation
+* Liberty `.lib` files
+* Setup timing
+* Hold timing
+* PVT analysis
+* Drive strength optimization
+
+---
+
+## Combinational Optimization
+
+* Constant propagation
+* Boolean simplification
+* Dead logic elimination
+* Multi-module optimization
+
+---
+
+## Sequential Optimization
+
+* Register optimization
+* Counter optimization
+* Sequential constant propagation
+* Flip-flop inference
+
+---
+
+## Gate-Level Simulation (GLS)
+
+* Netlist verification
+* Post-synthesis validation
+* RTL vs GLS comparison
+* Functional equivalence checking
+
+---
+
+## RTL Coding Styles
+
+* Blocking vs Non-blocking assignments
+* Sensitivity list importance
+* IF vs CASE constructs
+* Latch inference avoidance
+* Generate-based scalable RTL
+
+---
+
+# 📊 Important Comparisons
+
+| Comparison                       | Observation                        |
+| -------------------------------- | ---------------------------------- |
+| RTL vs GLS                       | GLS uses synthesized hardware      |
+| Blocking vs Non-Blocking         | Sequential vs Parallel behavior    |
+| Hierarchical vs Flat Synthesis   | Debugging vs Optimization tradeoff |
+| Complete vs Incomplete CASE      | No latch vs Latch inference        |
+| FOR vs FOR GENERATE              | Behavioral vs Structural           |
+| Optimized vs Non-Optimized Logic | Reduced area and gate count        |
+| Fast Cells vs Slow Cells         | Speed vs Area/Power tradeoff       |
+
+---
+
+# 📸 Repository Highlights
+
+✅ Day-wise structured documentation
 ✅ RTL + GLS Verification
+✅ SKY130 Standard Cell Mapping
 ✅ Waveform Analysis
-✅ Synthesized Netlists
+✅ Gate-Level Netlists
+✅ Yosys Synthesis Flow
 ✅ Optimization Examples
-✅ SKY130 Technology Mapping
-✅ Gate-Level Schematics
-✅ Beginner Friendly Structure
+✅ Timing Library Analysis
+✅ Generate-based RTL Design
+✅ Latch Inference Analysis
+✅ Beginner-Friendly Explanations
 ✅ Open-Source ASIC Design Flow
+
+---
+
+# 🧪 Skills Demonstrated
+
+This repository demonstrates practical understanding of:
+
+* Verilog RTL Design
+* RTL Simulation
+* Waveform Analysis
+* Logic Synthesis
+* SKY130 Standard Cell Mapping
+* Timing Library Analysis
+* Gate-Level Simulation (GLS)
+* Synthesis Optimization
+* Sequential Logic Design
+* Combinational Logic Design
+* Generate Constructs
+* ASIC Design Fundamentals
+* Linux-based ASIC Flow
+* Yosys Synthesis Flow
+* Synthesis-aware RTL Coding
 
 ---
 
 # 👩‍💻 Author
 
-## pujitha reddy keth
+## Kethireddy Pujitha Reddy
 
 Electronics & Communication Engineering Student
 
@@ -346,9 +424,9 @@ Interested in:
 * VLSI Design
 * RTL Design
 * ASIC Design Flow
-* Digital Electronics
 * Verilog HDL
 * Open-Source Silicon
+* Digital Electronics
 
 ---
 
@@ -356,13 +434,15 @@ Interested in:
 
 Special thanks to:
 
-* Workshop Mentors & Instructors
+* Kunal Ghosh
+* VSD (VLSI System Design) Platform
 * SKY130 Open PDK Contributors
 * Yosys Development Team
 * Icarus Verilog Contributors
 * Open-Source VLSI Community
 
 ---
+
 
 # 📌 Conclusion
 
@@ -374,7 +454,8 @@ This workshop provided strong practical understanding of:
 * Optimization Techniques
 * Gate-Level Simulation
 * SKY130 Standard Cells
-* Synthesis-Aware Coding Styles
+* Synthesis-aware RTL Coding
+* Generate-based Hardware Design
 
 Through hands-on labs, waveform analysis, synthesized netlists, optimization experiments, and GLS verification, this repository establishes a strong foundation in RTL design and synthesis using open-source ASIC tools.
 
@@ -385,4 +466,3 @@ Through hands-on labs, waveform analysis, synthesized netlists, optimization exp
 # ⭐ If you found this repository useful, consider giving it a star ⭐
 
 </div>
-
